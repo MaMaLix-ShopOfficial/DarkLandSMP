@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b9e5ff">
+  <title>DarkLand SMP</title>
+  <style>
+    :root {
+      --sky: #c7eaff;
+      --blue: #69bfff;
+      --deep: #153d60;
+      --glass: rgba(255,255,255,.43);
+      --line: rgba(255,255,255,.68);
+    }
+    * { box-sizing: border-box; }
+    html, body { cursor: url("darkland-cursor.png") 5 4, auto; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--deep);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(ellipse at 15% 15%, rgba(255,255,255,.95), transparent 35%),
+        radial-gradient(ellipse at 85% 80%, rgba(106,190,255,.42), transparent 38%),
+        linear-gradient(135deg, #e4f6ff 0%, #bfe5ff 48%, #d9f1ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 34px 18px 24px;
+    }
+    #particles {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .ambient {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: .35;
+      pointer-events: none;
+      z-index: 0;
+      animation: float 12s ease-in-out infinite alternate;
+      background: #80caff;
+    }
+    .ambient.one { top: -180px; left: -120px; }
+    .ambient.two { bottom: -220px; right: -120px; animation-delay: -5s; background: #fff; }
+    @keyframes float { to { transform: translate(80px, 55px) scale(1.18); } }
+
+    .page {
+      width: min(100%, 560px);
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      animation: pageIn .9s cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes pageIn { from { opacity: 0; transform: translateY(22px) scale(.98); } to { opacity: 1; transform: none; } }
+
+    .brand {
+      margin: 0 0 12px;
+      font-family: "Courier New", monospace;
+      font-size: clamp(3rem, 11vw, 5.7rem);
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: -5px;
+      background: linear-gradient(90deg, #ff4d8d, #8b5cff, #20bfff, #25d9a2, #ffca55, #ff4d8d);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: rgbShift 7s ease infinite;
+      filter: drop-shadow(0 7px 15px rgba(68,150,220,.13));
+    }
+    @keyframes rgbShift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    .subtitle {
+      margin: 0 auto 30px;
+      color: #47799e;
+      font-size: .92rem;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .panel {
+      padding: clamp(22px, 5vw, 34px);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(255,255,255,.62), rgba(255,255,255,.24));
+      box-shadow: 0 22px 70px rgba(59,137,190,.17), inset 0 1px 0 rgba(255,255,255,.8);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .buttons { display: grid; gap: 13px; }
+    .link-button {
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      width: 100%;
+      min-height: 65px;
+      padding: 0 21px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.96);
+      border-radius: 19px;
+      color: #174d76;
+      background:
+        linear-gradient(118deg, rgba(255,255,255,.82) 0%, rgba(255,255,255,.30) 22%, rgba(177,224,255,.38) 48%, rgba(255,255,255,.62) 74%, rgba(255,255,255,.32) 100%);
+      background-size: 220% 220%;
+      box-shadow:
+        0 12px 28px rgba(55,143,204,.18),
+        0 3px 8px rgba(255,255,255,.72) inset,
+        0 -2px 8px rgba(91,177,235,.13) inset,
+        0 0 0 1px rgba(255,255,255,.28);
+      backdrop-filter: blur(24px) saturate(185%);
+      -webkit-backdrop-filter: blur(24px) saturate(185%);
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: .015em;
+      cursor: url("darkland-cursor.png") 5 4, pointer;
+      transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .link-button::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: -2px;
+      border-radius: inherit;
+      opacity: .72;
+      background: linear-gradient(112deg, transparent 10%, rgba(255,255,255,.92) 32%, rgba(255,255,255,.18) 48%, transparent 66%);
+      background-size: 230% 100%;
+      background-position: 150% 0;
+      transition: opacity .25s ease;
+      pointer-events: none;
+    }
+    .link-button::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 17px;
+      pointer-events: none;
+      background:
+        linear-gradient(155deg, rgba(255,255,255,.56), transparent 34%),
+        radial-gradient(ellipse at 50% -35%, rgba(255,255,255,.85), transparent 62%);
+      opacity: .7;
+      z-index: -1;
+    }
+    .link-button:hover {
+      transform: translateY(-5px) scale(1.018);
+      border-color: rgba(255,255,255,1);
+      background-position: 100% 50%;
+      box-shadow:
+        0 18px 38px rgba(45,139,207,.25),
+        0 0 12px rgba(255,255,255,.95),
+        0 0 32px rgba(91,190,255,.62),
+        0 0 58px rgba(91,190,255,.28),
+        0 3px 10px rgba(255,255,255,.9) inset;
+    }
+    .link-button:hover::before {
+      opacity: 1;
+      animation: shine 1.05s ease-in-out infinite;
+    }
+    .link-button:hover::after { opacity: 1; }
+    .link-button:focus-visible {
+      outline: 3px solid rgba(67,164,235,.6);
+      outline-offset: 4px;
+    }
+    .link-button:active { transform: scale(.975); }
+    @keyframes shine {
+      0% { background-position: 150% 0; }
+      100% { background-position: -70% 0; }
+    }
+    .button-label { display: flex; align-items: center; gap: 13px; }
+    .icon {
+      width: 34px; height: 34px;
+      display: grid; place-items: center;
+      border-radius: 11px;
+      background: rgba(105,191,255,.2);
+      font-size: 1.1rem;
+    }
+    .arrow { font-size: 1.35rem; opacity: .55; transition: transform .25s ease, opacity .25s ease; }
+    .link-button:hover .arrow { transform: translateX(4px); opacity: 1; }
+
+    .footer {
+      display: inline-block;
+      margin-top: 25px;
+      font-family: "Courier New", monospace;
+      font-size: .82rem;
+      font-weight: 900;
+      letter-spacing: .14em;
+      background: linear-gradient(90deg, #ff4d8d, #8b5cff, #20bfff, #25d9a2, #ffca55, #ff4d8d);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: rgbShift 7s ease infinite;
+      filter: drop-shadow(0 0 8px rgba(91,177,235,.28));
+    }
+
+    /* Five-second loading screen */
+    .loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #e7f7ff, #b9e3ff);
+      transition: opacity .65s ease, visibility .65s ease;
+    }
+    .loader.hidden { opacity: 0; visibility: hidden; }
+    .loader-box { width: min(340px, calc(100% - 50px)); text-align: center; }
+    .loader-title {
+      margin-bottom: 22px;
+      color: #367eaf;
+      font: 900 1.5rem "Courier New", monospace;
+      letter-spacing: .08em;
+    }
+    .loading-track {
+      height: 9px;
+      overflow: hidden;
+      border-radius: 20px;
+      background: rgba(66,139,190,.15);
+      box-shadow: inset 0 2px 5px rgba(37,105,151,.12);
+    }
+    .loading-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #6bbdff, #9ce6ff, #5daeff);
+      box-shadow: 0 0 18px rgba(72,173,255,.7);
+      animation: load 5s linear forwards;
+    }
+    @keyframes load { to { width: 100%; } }
+    .loading-text {
+      margin-top: 13px;
+      color: #5b8eaf;
+      font: 700 .72rem "Courier New", monospace;
+      letter-spacing: .18em;
+    }
+
+    /* Tap burst */
+    .burst {
+      position: fixed;
+      z-index: 20;
+      width: 12px; height: 12px;
+      border: 2px solid rgba(255,255,255,.95);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: burst .72s ease-out forwards;
+      box-shadow: 0 0 18px rgba(76,177,255,.75);
+    }
+    @keyframes burst {
+      0% { opacity: .95; width: 8px; height: 8px; }
+      100% { opacity: 0; width: 170px; height: 170px; border-width: 1px; }
+    }
+    .spark {
+      position: fixed;
+      z-index: 21;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 12px 3px #8bd5ff;
+      pointer-events: none;
+      animation: spark .65s ease-out forwards;
+    }
+    @keyframes spark {
+      to { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+    }
+    @media (max-width: 420px) {
+      body { padding-inline: 13px; }
+      .brand { letter-spacing: -3px; }
+      .link-button { min-height: 61px; padding-inline: 15px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div class="ambient one"></div>
+  <div class="ambient two"></div>
+
+  <div class="loader" id="loader">
+    <div class="loader-box">
+      <div class="loader-title">DARKLAND SMP</div>
+      <div class="loading-track"><div class="loading-fill"></div></div>
+      <div class="loading-text">INITIALIZING EXPERIENCE...</div>
+    </div>
+  </div>
+
+  <main class="page">
+    <h1 class="brand">DarkLand SMP</h1>
+    <p class="subtitle">Your adventure starts here</p>
+
+    <section class="panel" aria-label="Server Links">
+      <div class="buttons">
+        <button class="link-button" data-link="OWNER_LINK">
+          <span class="button-label"><span class="icon">♛</span>Owner's DM</span><span class="arrow">↗</span>
+        </button>
+        <button class="link-button" data-link="SERVER_CHANNEL_LINK">
+          <span class="button-label"><span class="icon">▣</span>Server Channel</span><span class="arrow">↗</span>
+        </button>
+        <button class="link-button" data-link="SERVER_GROUP_LINK">
+          <span class="button-label"><span class="icon">◎</span>Server Group</span><span class="arrow">↗</span>
+        </button>
+      </div>
+    </section>
+
+    <footer class="footer">Coded By MaMaLiX</footer>
+  </main>
+
+  <script>
+    // Replace these three values with your own URLs.
+    const LINKS = {
+      OWNER_LINK: "https://rubika.ir/IRx0LEX",
+      SERVER_CHANNEL_LINK: "https://rubika.ir/DARKLANDSMP",
+      SERVER_GROUP_LINK: "https://rubika.ir/joing/BBIEDCACJ0VBCFIRUBSYVXERTKPKGYOY"
+    };
+
+    // Five-second intro loader.
+    window.addEventListener("load", () => {
+      setTimeout(() => document.getElementById("loader").classList.add("hidden"), 5000);
+    });
+
+    // Animated connected-particle background.
+    (() => {
+      const canvas = document.getElementById("particles");
+      const ctx = canvas.getContext("2d");
+      let width, height, particles = [];
+      const pointer = { x: -1000, y: -1000 };
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width * dpr; canvas.height = height * dpr;
+        canvas.style.width = width + "px"; canvas.style.height = height + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.min(95, Math.max(38, Math.floor(width * height / 12500)));
+        particles = Array.from({ length: count }, () => ({
+          x: Math.random() * width, y: Math.random() * height,
+          vx: (Math.random() - .5) * .48, vy: (Math.random() - .5) * .48,
+          r: Math.random() * 2 + 1
+        }));
+      }
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const dx = pointer.x - p.x, dy = pointer.y - p.y;
+          const distanceToPointer = Math.hypot(dx, dy);
+          if (distanceToPointer < 125 && distanceToPointer > 0) {
+            p.vx -= dx / distanceToPointer * .008;
+            p.vy -= dy / distanceToPointer * .008;
+          }
+          p.x += p.vx; p.y += p.vy;
+          p.vx *= .999; p.vy *= .999;
+          if (p.x < -10 || p.x > width + 10) p.vx *= -1;
+          if (p.y < -10 || p.y > height + 10) p.vy *= -1;
+          p.x = Math.max(-10, Math.min(width + 10, p.x));
+          p.y = Math.max(-10, Math.min(height + 10, p.y));
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255,255,255,.9)";
+          ctx.shadowBlur = 10; ctx.shadowColor = "rgba(83,177,235,.7)";
+          ctx.fill(); ctx.shadowBlur = 0;
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const q = particles[j];
+            const d = Math.hypot(p.x - q.x, p.y - q.y);
+            if (d < 125) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+              ctx.strokeStyle = `rgba(75,158,211,${(1 - d / 125) * .25})`;
+              ctx.lineWidth = .8; ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      window.addEventListener("resize", resize);
+      window.addEventListener("pointermove", e => { pointer.x = e.clientX; pointer.y = e.clientY; });
+      window.addEventListener("pointerleave", () => { pointer.x = -1000; pointer.y = -1000; });
+      resize(); animate();
+    })();
+
+    // Soft expanding tap halo and particles on every button press.
+    function createTapEffect(x, y) {
+      const ring = document.createElement("span");
+      ring.className = "burst";
+      ring.style.left = x + "px"; ring.style.top = y + "px";
+      document.body.appendChild(ring);
+      ring.addEventListener("animationend", () => ring.remove());
+
+      for (let i = 0; i < 12; i++) {
+        const spark = document.createElement("span");
+        const angle = Math.PI * 2 * i / 12 + Math.random() * .25;
+        const distance = 35 + Math.random() * 65;
+        spark.className = "spark";
+        spark.style.left = x + "px"; spark.style.top = y + "px";
+        spark.style.setProperty("--dx", Math.cos(angle) * distance + "px");
+        spark.style.setProperty("--dy", Math.sin(angle) * distance + "px");
+        document.body.appendChild(spark);
+        spark.addEventListener("animationend", () => spark.remove());
+      }
+    }
+
+    // Every click/tap anywhere on the page creates the same soft halo effect.
+    // The short sound is synthesized with Web Audio; no external audio file is needed.
+    let audioContext;
+    function playTapSound() {
+      try {
+        audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === "suspended") audioContext.resume();
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(720, now);
+        oscillator.frequency.exponentialRampToValueAtTime(360, now + 0.055);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.09);
+      } catch (error) {
+        // Sound may be unavailable in browsers that do not support Web Audio.
+      }
+    }
+
+    // Show the same halo and spark burst for clicks anywhere on desktop,
+    // and taps anywhere on touch devices (not only on the buttons).
+    document.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      createTapEffect(event.clientX, event.clientY);
+      playTapSound();
+    }, { passive: true });
+
+    document.querySelectorAll(".link-button").forEach(button => {
+      button.addEventListener("click", () => {
+        const key = button.dataset.link;
+        const url = LINKS[key];
+        if (url && !url.includes("example.com")) {
+          setTimeout(() => window.open(url, "_blank", "noopener,noreferrer"), 100);
+        } else {
+          console.info(`Add your URL in the LINKS object for: ${key}`);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
